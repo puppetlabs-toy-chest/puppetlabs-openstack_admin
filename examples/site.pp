@@ -16,7 +16,9 @@ class { 'openstack::test_file': }
 
 # Only multi-host is currently supported for HA mode.
 $multi_host              = true
-
+# By default, corosync uses multicasting. It is possible to disable
+# this if your environment require it
+$corosync_unicast        = true
 # assumes that eth0 is the public interface
 $public_interface        = 'eth0'
 # assumes that eth1 is the interface that will be used for the vm network
@@ -172,6 +174,7 @@ node active {
     logical_volume      => 'drbd-openstack',
     corosync_address    => $controller_node_network,
     multi_host          => $multi_host,
+    corosync_unicast    => $corosync_unicast,
     initial_setup       => $initial_setup,
   }
 }
@@ -249,6 +252,7 @@ node passive {
     logical_volume      => 'drbd-openstack',
     corosync_address    => $controller_node_network,
     multi_host          => $multi_host,
+    corosync_unicast    => $corosync_unicast,
     initial_setup       => $initial_setup,
   }
 }

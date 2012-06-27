@@ -13,6 +13,7 @@ class openstack_admin::controller::ha(
   $ha_primary,
   $corosync_address,
   $initial_setup      = false,
+  $corosync_unicast   = false,
   $multicast_address  = '226.94.1.1',
   $drbd_resource      = 'openstack',
   $drbd_device        = 'drbd0',
@@ -78,11 +79,15 @@ class openstack_admin::controller::ha(
   }
 
   # Corosync services
+  if $corosync_unicast {
+    $unicast_addresses = [ $primary_address, $secondary_address ]
+  }
 
   class { 'corosync':
     enable_secauth    => false,
     bind_address      => $corosync_address,
-    multicast_address => $multicast_address
+    multicast_address => $multicast_address,
+    unicast_addresses => $unicast_addresses,
   }
 
   corosync::service { 'pacemaker':
