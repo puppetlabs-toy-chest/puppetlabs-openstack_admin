@@ -4,6 +4,15 @@
 # with high-availability on the controller
 #
 
+#
+# Things to watch out for, compared to a standard openstack::controller setup:
+#  * $controller_hostname: The hostname of the controller as seen by other
+#    hosts. Shared by both the primary and secondary controller nodes.
+#  * $controller_hostname_{primary,secondary}: The actual hostnames of the
+#    primary/secondary controller nodes
+#  * $controller_address_{primary,secondary}: The actual IP addresses of the
+#    primary/secondary controller nodes
+
 # deploy a script that can be used to test nova
 class { 'openstack::test_file': }
 
@@ -70,9 +79,9 @@ $controller_hostname_secondary = 'passive'
 # nodes use for the actual IP addresses
 $controller_node_network       = '192.168.101.0'
 
-$sql_connection         = "mysql://nova:${nova_db_password}@${controller_node_address}/nova"
+$sql_connection = "mysql://nova:${nova_db_password}@${controller_node_address}/nova"
 
-# /etc/hosts entries for the primary/secondary controllers
+# /etc/hosts entries for the controller nodes
 host { $controller_hostname_primary:
   ip => $controller_node_primary
 }

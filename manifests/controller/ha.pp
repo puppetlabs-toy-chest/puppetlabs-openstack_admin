@@ -1,3 +1,31 @@
+#
+# This can be used to build an HA-enabled openstack controller
+#
+# [volume_group] Volume group to be used for data replication
+# [logical_volume] Logical volume to be used for data replication
+# [primary_hostname] Hostname of the primary/active controller node
+# [secondary_hostname] Hostname of the secondary/fallback controller node
+# [controller_hostname] Public/shared hostname for the controller nodes
+# [primary_address] IP address of the primary/active controller node
+# [secondary_address] IP address of the secondary/passive controller node
+# [public_address] Shared IP address for controller nodes. Must match
+#                  openstack::controller::public_address
+# [internal_address] Shared IP address for controller nodes. Must match
+#                  openstack::controller::internal_address
+# [ha_primary] Whether or not this node is the primary/active controller
+# [corosync_address] The address corosync should listen listen on.
+# [initial_setup] If false, potentially dangerous operations are disabled
+# [corosync_unicast] If true, corosync will be configured for unicast.
+#                    Defaults to false
+# [multicast_address] The multicast address for corosync to listen on
+# [drbd_resource] The name of the DRBD resource for replication
+# [drbd_device] The DRBD device to use for replication
+# [multi_host] Whether openstack is configured for multihost mode.
+#              Defaults to true. false is currently unsupported
+# [stonith_enabled] Whether to use pacemaker STONITH. Requires additional
+#                   configuration in order to enable. If it is enabled
+#                   without proper system configuration, corosync will fail
+#                   to function properly.
 class openstack_admin::controller::ha(
   $volume_group,
   $logical_volume,
@@ -17,7 +45,7 @@ class openstack_admin::controller::ha(
   $multicast_address  = '226.94.1.1',
   $drbd_resource      = 'openstack',
   $drbd_device        = 'drbd0',
-  $multi_host         = false,
+  $multi_host         = true,
   $stonith_enabled    = 'false'
 ) {
 
