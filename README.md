@@ -12,6 +12,6 @@ See `examples/site.pp` for an example of how to use the class.
 
 ## Dependencies
   * `puppetlabs/puppetlabs-openstack`
+  * `puppetlabs/puppetlabs-openstack_admin`
   * `branan/puppet-drbd`
-  * `branan/puppet-openstack_admin`
   * `branan/puppetlabs-corosync`
