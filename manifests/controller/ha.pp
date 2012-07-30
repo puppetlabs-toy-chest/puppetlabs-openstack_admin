@@ -136,6 +136,7 @@ class openstack_admin::controller::ha(
       },
       operations      => { 'monitor' => { 'interval' => '30s' } },
       metadata        => { 'is-managed' => 'true' },
+      require         => Cs_property['stonith-enabled', 'no-quorum-policy']
     }
 
     if $public_address != $internal_address {
@@ -151,6 +152,7 @@ class openstack_admin::controller::ha(
         },
         operations      => { 'monitor' => { 'interval' => '30s' } },
         metadata        => { 'is-managed' => 'true' },
+        require         => Cs_property['stonith-enabled', 'no-quorum-policy']
       }
 
       cs_colocation { 'ips_together':
@@ -473,18 +475,6 @@ class openstack_admin::controller::ha(
       value => $stonith_enabled
     }
 
-    # Make sure the corosync service is started before we insert the configuration
-    Service['corosync'] -> Cs_property<| |>
-
-    # corosync won't add relationships unless the primitives already exist
-    Cs_primitive<| |> -> Cs_colocation<| |>
-    Cs_primitive<| |> -> Cs_order<| |>
-    
-    # Corosync misconfiguration can cause puppet/corosync to silently fail.
-    # Making sure properties are set before any other corosync stuff runs
-    # helps to avoid this.
-    Cs_property<| |> -> Cs_primitive<| |>
-    Cs_property<| |> -> Exec['create_cib']
 
     # The following execs wrap things that the puppet corosync module currently can't handle
 
@@ -495,22 +485,10 @@ class openstack_admin::controller::ha(
       before      => Exec['initial-db-sync'],
     }
 
-    # Create a corosync shadow configuration for openstack
-    exec { 'create_cib':
-      command => '/usr/sbin/crm cib new openstack',
-      require => Service['corosync'],
+    cs_shadow { 'openstack':
+      require => Cs_property['stonith-enabled', 'no-quorum-policy']
     }
-    Exec['create_cib'] -> Cs_primitive<| primitive_type != 'IPaddr2'  |>
-
-    # Once all the corosync types have run, we commit the openstack
-    # shadow CIB to the main corosync config
-    exec { 'commit_cib':
-      command     => '/usr/sbin/crm cib commit openstack',
-    }
-    Cs_colocation<| |> -> Exec['commit_cib']
-    Cs_order<| |> -> Exec['commit_cib']
   }
-    
 
   # This dirtiness makes sure that Corosync can manage the openstack services
   # need to let puppet try to enable them on the primary, so that the DB can be
